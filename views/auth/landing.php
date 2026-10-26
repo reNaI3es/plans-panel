@@ -1,35 +1,52 @@
 <?php
 declare(strict_types=1);
-/**
- * Лендінг — публічна сторінка до входу.
- */
 ?>
 <!DOCTYPE html>
-<html lang="uk" data-theme="dark">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>reNaI3es — Внутрішня панель</title>
+    <title>reNaI3es</title>
     <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
     <style>
-        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; position: relative; overflow: hidden; }
-        .hero-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        .hero-content { position: relative; z-index: 1; max-width: 600px; }
-        .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 1rem; line-height: 1.1; }
-        .hero p { font-size: 1.125rem; color: var(--text-dim); margin-bottom: 2rem; }
+        .landing { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+        .landing-content { max-width: 480px; }
+        .landing h1 { font-family: var(--font-display); font-size: clamp(28px, 5vw, 40px); font-weight: 300; letter-spacing: -0.03em; margin-bottom: 12px; }
+        .landing h1 .accent { color: var(--accent); }
+        .landing p { font-size: 14px; color: var(--mute); margin-bottom: 32px; line-height: 1.7; }
+        .landing-features { display: flex; gap: 24px; justify-content: center; margin-top: 48px; flex-wrap: wrap; }
+        .landing-feature { font-size: 12px; color: var(--mute); }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <canvas id="hero-canvas" class="hero-canvas"></canvas>
-        <div class="hero-content">
-            <h1>🎮 reNaI3es</h1>
-            <p>Закрита панель керування командою.<br>Завдання, сервери, база знань, ШІ-помічник.</p>
-            <a href="<?= url('/login') ?>" class="btn btn-primary" style="font-size: 1rem; padding: 0.875rem 2rem;">
-                Увійти →
+    <div class="landing">
+        <div class="landing-content page-enter">
+            <div class="cube-scene" style="margin-bottom:32px">
+                <div class="cube">
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                </div>
+            </div>
+
+            <h1>reNaI3<span class="accent">e</span>s</h1>
+            <p>Закрита панель керування кіберспортивною командою. Завдання, сервери, база знань, ШІ-помічник.</p>
+
+            <a href="<?= url('/login') ?>" class="btn btn-primary">
+                Увійти
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 18 15 12 9 6"/></svg>
             </a>
+
+            <div class="landing-features">
+                <div class="landing-feature">Argon2id + 2FA</div>
+                <div class="landing-feature">Kanban + Календар</div>
+                <div class="landing-feature">Моніторинг серверів</div>
+                <div class="landing-feature">ШІ-помічник</div>
+            </div>
         </div>
     </div>
-    <script src="<?= asset('js/app.js') ?>" defer></script>
 </body>
 </html>
