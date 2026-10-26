@@ -74,6 +74,7 @@ $router->get('/categories/{id}', [\App\Controllers\CategoriesController::class, 
 // --- Команда ---
 $router->get('/team', [\App\Controllers\TeamController::class, 'index'], $authMiddleware);
 $router->get('/team/matrix', [\App\Controllers\TeamController::class, 'matrix'], $authMiddleware);
+$router->post('/team/assign', [\App\Controllers\TeamController::class, 'assignCategory'], $authMiddleware);
 $router->get('/team/{id}', [\App\Controllers\TeamController::class, 'show'], $authMiddleware);
 
 // --- База знань ---
@@ -84,7 +85,12 @@ $router->get('/kb/links', [\App\Controllers\KbController::class, 'links'], $auth
 
 // --- Сервери ---
 $router->get('/servers', [\App\Controllers\ServersController::class, 'index'], $authMiddleware);
+$router->get('/servers/create', [\App\Controllers\ServersController::class, 'create'], $authMiddleware);
+$router->post('/servers/create', [\App\Controllers\ServersController::class, 'store'], $authMiddleware);
 $router->get('/servers/{id}', [\App\Controllers\ServersController::class, 'show'], $authMiddleware);
+$router->get('/servers/{id}/edit', [\App\Controllers\ServersController::class, 'edit'], $authMiddleware);
+$router->post('/servers/{id}/edit', [\App\Controllers\ServersController::class, 'update'], $authMiddleware);
+$router->post('/servers/{id}/delete', [\App\Controllers\ServersController::class, 'delete'], $authMiddleware);
 
 // --- ШІ-помічник ---
 $router->get('/ai', [\App\Controllers\AiController::class, 'chat'], $authMiddleware);
@@ -98,6 +104,11 @@ $router->post('/notifications/read', [\App\Controllers\NotificationsController::
 $router->get('/admin/settings', [\App\Controllers\AdminController::class, 'settings'], $authMiddleware);
 $router->post('/admin/settings', [\App\Controllers\AdminController::class, 'updateSettings'], $authMiddleware);
 $router->get('/admin/users', [\App\Controllers\AdminController::class, 'users'], $authMiddleware);
+$router->get('/admin/users/create', [\App\Controllers\AdminController::class, 'createUser'], $authMiddleware);
+$router->post('/admin/users/create', [\App\Controllers\AdminController::class, 'storeUser'], $authMiddleware);
+$router->get('/admin/users/{id}/edit', [\App\Controllers\AdminController::class, 'editUser'], $authMiddleware);
+$router->post('/admin/users/{id}/edit', [\App\Controllers\AdminController::class, 'updateUser'], $authMiddleware);
+$router->post('/admin/users/{id}/delete', [\App\Controllers\AdminController::class, 'deleteUser'], $authMiddleware);
 $router->get('/admin/audit', [\App\Controllers\AdminController::class, 'audit'], $authMiddleware);
 $router->get('/admin/logins', [\App\Controllers\AdminController::class, 'logins'], $authMiddleware);
 

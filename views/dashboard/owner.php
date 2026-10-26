@@ -21,7 +21,7 @@
     'done' => ['label' => 'Готово', 'statuses' => ['done']],
   ];
   foreach ($cols as $key => $col):
-    $colTasks = array_filter($tasks ?? [], fn($t) => in_array($t['status'] ?? '', $col['statuses']));
+    $colTasks = array_values(array_filter($tasks ?? [], function($t) use ($col) { return in_array($t['status'] ?? '', $col['statuses']); }));
   ?>
   <div class="col" data-s="<?= $key ?>">
     <h2><span><?= $col['label'] ?></span><em><?= count($colTasks) ?></em></h2>
