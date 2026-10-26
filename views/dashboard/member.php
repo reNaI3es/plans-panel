@@ -1,97 +1,65 @@
-<?php
-declare(strict_types=1);
-/**
- * Дашборд учасника (member) — першим ділом бачить своє.
- */
+<?php declare(strict_types=1);
 \App\Core\View::startSection('content');
 ?>
+<div class="head">
+  <div>
+    <h1>Вітаю, <span style="color:var(--accent)"><?= e($user['display_name'] ?? '') ?></span></h1>
+    <p>Твої завдання та обов'язки на сьогодні.</p>
+  </div>
+</div>
 
-<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">
-    Привіт, <?= e($user['display_name'] ?? '') ?> 👋
-</h1>
-
-<!-- Термінове -->
-<?php if (!empty($urgent)): ?>
-<div class="card" style="border-color: var(--danger); margin-bottom: 1.5rem;">
-    <h2 style="font-size: 1rem; font-weight: 600; color: var(--danger); margin-bottom: 1rem;">🔥 Термінове</h2>
-    <?php foreach ($urgent as $task): ?>
-        <div style="padding: 0.75rem 0; border-bottom: 1px solid var(--line);">
-            <a href="<?= url('/tasks/' . ($task['public_id'] ?? '')) ?>" style="font-weight: 500;">
-                <?= e($task['code'] ?? '') ?> — <?= e($task['title'] ?? '') ?>
-            </a>
-            <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.25rem;">
-                <?php if ($task['due_at'] && strtotime($task['due_at']) < time()): ?>
-                    <span style="color: var(--danger);">⏰ Прострочено <?= dt($task['due_at'], 'd.m.Y H:i') ?></span>
-                <?php else: ?>
-                    <span style="color: var(--warning);">⏰ До <?= dt($task['due_at'] ?? '', 'd.m.Y H:i') ?></span>
-                <?php endif; ?>
-            </div>
-        </div>
+<?php if (!empty($urgent ?? [])): ?>
+<section style="margin-bottom:32px">
+  <h3 style="color:var(--bad);font:500 13.5px 'Manrope';margin:0 0 12px">Термінове</h3>
+  <div style="border:1px solid var(--line);border-radius:var(--r)">
+    <?php foreach ($urgent as $t): ?>
+    <a href="<?= url('/tasks/' . ($t['public_id'] ?? '')) ?>" class="task">
+      <b><?= e($t['title'] ?? '') ?></b>
+      <small><span>Строк: <?= dt($t['due_at'] ?? '', 'd.m.Y H:i') ?></span></small>
+    </a>
     <?php endforeach; ?>
-</div>
+  </div>
+</section>
 <?php endif; ?>
 
-<!-- Мої обов'язки -->
-<?php if (!empty($myCategories)): ?>
-<div class="card" style="margin-bottom: 1.5rem;">
-    <h2 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">📁 Мої обов'язки</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.75rem;">
-        <?php foreach ($myCategories as $cat): ?>
-            <div style="padding: 1rem; background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius);">
-                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <span><?= $cat['icon'] ?? '📁' ?></span>
-                    <strong style="font-size: 0.875rem;"><?= e($cat['title'] ?? '') ?></strong>
-                    <span class="badge badge-info" style="margin-left: auto;"><?= e($cat['role_in_category'] ?? '') ?></span>
-                </div>
-                <?php if ($cat['duty_text'] ?? ''): ?>
-                    <p style="font-size: 0.75rem; color: var(--text-dim); line-height: 1.4;"><?= e(str_limit($cat['duty_text'], 120)) ?></p>
-                <?php endif; ?>
-                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
-                    Активних завдань: <?= (int)($cat['active_count'] ?? 0) ?>
-                </div>
-            </div>
-        <?php endforeach; ?>
+<?php if (!empty($myCategories ?? [])): ?>
+<section style="margin-bottom:32px">
+  <h3 style="font:500 13.5px 'Manrope';color:var(--mute);margin:0 0 12px">Мої обов'язки</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px">
+    <?php foreach ($myCategories as $cat): ?>
+    <div style="border:1px solid var(--line);border-radius:var(--r);padding:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:18px"><?= $cat['icon'] ?? '📁' ?></span>
+        <strong style="font-size:14px"><?= e($cat['title'] ?? '') ?></strong>
+        <span class="badge badge-accent" style="margin-left:auto"><?= e($cat['role_in_category'] ?? '') ?></span>
+      </div>
+      <?php if ($cat['duty_text'] ?? ''): ?>
+      <p style="font-size:12px;color:var(--mute);line-height:1.5"><?= e(str_limit($cat['duty_text'], 100)) ?></p>
+      <?php endif; ?>
+      <div style="margin-top:8px;font-size:11px;color:var(--mute)">Активних: <?= (int)($cat['active_count'] ?? 0) ?></div>
     </div>
-</div>
+    <?php endforeach; ?>
+  </div>
+</section>
 <?php endif; ?>
 
-<!-- Мої завдання -->
-<div class="card" style="margin-bottom: 1.5rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h2 style="font-size: 1rem; font-weight: 600;">✅ Мої завдання</h2>
-        <a href="<?= url('/tasks') ?>" class="btn btn-sm">Усі →</a>
-    </div>
-    <?php if (empty($myTasks)): ?>
-        <p style="color: var(--text-muted); font-size: 0.875rem;">Немає активних завдань 🎉</p>
-    <?php else: ?>
-        <?php foreach (array_slice($myTasks, 0, 10) as $task): ?>
-            <div style="padding: 0.75rem 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <a href="<?= url('/tasks/' . ($task['public_id'] ?? '')) ?>" style="font-weight: 500; font-size: 0.875rem;">
-                        <?= e($task['code'] ?? '') ?> — <?= e($task['title'] ?? '') ?>
-                    </a>
-                    <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 0.25rem;">
-                        <span class="badge badge-<?= $task['priority'] === 'critical' ? 'danger' : ($task['priority'] === 'high' ? 'warning' : 'info') ?>">
-                            <?= e($task['priority'] ?? '') ?>
-                        </span>
-                        <span style="margin-left: 0.5rem;">Строк: <?= dt($task['due_at'] ?? '', 'd.m.Y') ?></span>
-                    </div>
-                </div>
-                <span class="badge badge-<?= $task['status'] === 'done' ? 'success' : 'info' ?>">
-                    <?= e($task['status'] ?? '') ?>
-                </span>
-            </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
-</div>
-
-<!-- Швидкі дії -->
-<div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-    <a href="<?= url('/kb') ?>" class="btn">📚 База знань</a>
-    <a href="<?= url('/servers') ?>" class="btn">🖥️ Сервери</a>
-    <a href="<?= url('/ai') ?>" class="btn">🤖 ШІ-помічник</a>
-    <a href="<?= url('/notifications') ?>" class="btn">🔔 Сповіщення</a>
-</div>
-
+<section>
+  <h3 style="font:500 13.5px 'Manrope';color:var(--mute);margin:0 0 12px">Мої завдання</h3>
+  <?php if (empty($myTasks ?? [])): ?>
+    <div class="empty">Немає активних завдань</div>
+  <?php else: ?>
+  <div style="border:1px solid var(--line);border-radius:var(--r)">
+    <?php foreach (array_slice($myTasks ?? [], 0, 10) as $t): ?>
+    <a href="<?= url('/tasks/' . ($t['public_id'] ?? '')) ?>" class="task">
+      <b><?= e($t['title'] ?? '') ?></b>
+      <small>
+        <span class="badge badge-<?= $t['priority'] === 'critical' ? 'bad' : ($t['priority'] === 'high' ? 'warn' : 'accent') ?>"><?= e($t['priority'] ?? '') ?></span>
+        <span><?= dt($t['due_at'] ?? '', 'd.m.Y') ?></span>
+      </small>
+    </a>
+    <?php endforeach; ?>
+  </div>
+  <?php endif; ?>
+</section>
 <?php
 \App\Core\View::endSection();
