@@ -28,6 +28,8 @@ class DashboardController
     private function renderOwnerDashboard(array $user, Db $db): void
     {
         // Статистика
+        $total = (int)$db->fetchColumn("SELECT COUNT(*) FROM tasks WHERE deleted_at IS NULL AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+        $done = (int)$db->fetchColumn("SELECT COUNT(*) FROM tasks WHERE status = 'done' AND deleted_at IS NULL AND completed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
         $stats = [
             'active' => (int)$db->fetchColumn(
                 "SELECT COUNT(*) FROM tasks WHERE status NOT IN ('done','cancelled') AND deleted_at IS NULL"
@@ -38,9 +40,8 @@ class DashboardController
             'review' => (int)$db->fetchColumn(
                 "SELECT COUNT(*) FROM tasks WHERE status = 'review' AND deleted_at IS NULL"
             ),
-            'done_week' => (int)$db->fetchColumn(
-                "SELECT COUNT(*) FROM tasks WHERE status = 'done' AND completed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
-            ),
+            'done_week' => $done,
+            'done_pct' => $total > 0 ? round($done / $total * 100) : 0,
         ];
 
         // Потребує уваги
@@ -66,13 +67,26 @@ class DashboardController
              LIMIT 20"
         );
 
-        // Останні події
-        $recentActivity = $db->fetchAll(
-            "SELECT al.*, u.display_name
-             FROM audit_logs al
-             LEFT JOIN users u ON u.id = al.user_id
-             ORDER BY al.created_at DESC
-             LIMIT 10"
+        // Останні завдання для канбан-дошки
+        $tasks = $db->fetchAll(
+            "SELECT t.public_id, t.code, t.title, t.status, t.priority, t.due_at,
+                    c.title as category_title
+             FROM tasks t
+             LEFT JOIN categories c ON c.id = t.category_id
+             WHERE t.deleted_at IS NULL
+             ORDER BY t.priority DESC, t.due_at ASC
+             LIMIT 50"
+        );
+
+        // Сервери
+        $servers = $db->fetchAll(
+            "SELECT s.name, s.last_status,
+                    (SELECT players_online FROM server_stats WHERE server_id = s.id ORDER BY checked_at DESC LIMIT 1) as players_online,
+                    (SELECT players_max FROM server_stats WHERE server_id = s.id ORDER BY checked_at DESC LIMIT 1) as players_max
+             FROM servers s
+             WHERE s.monitor_enabled = 1
+             ORDER BY s.sort_order
+             LIMIT 5"
         );
 
         View::render('dashboard/owner', [
@@ -80,7 +94,8 @@ class DashboardController
             'stats' => $stats,
             'needsAttention' => $needsAttention,
             'team' => $team,
-            'recentActivity' => $recentActivity,
+            'tasks' => $tasks,
+            'servers' => $servers,
         ]);
     }
 

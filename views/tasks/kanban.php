@@ -1,57 +1,36 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 \App\Core\View::startSection('content');
 ?>
-
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h1 style="font-size: 1.5rem; font-weight: 700;">📋 Канбан</h1>
-    <div style="display: flex; gap: 0.5rem;">
-        <a href="<?= url('/tasks') ?>" class="btn btn-sm">📝 Список</a>
-        <a href="<?= url('/tasks/calendar') ?>" class="btn btn-sm">📅 Календар</a>
-    </div>
+<div class="head">
+  <div><h1>Канбан</h1><p>Перетягуй завдання між колонками.</p></div>
+  <div style="display:flex;gap:8px">
+    <a href="<?= url('/tasks') ?>" class="btn ghost sm">Список</a>
+    <a href="<?= url('/tasks/calendar') ?>" class="btn ghost sm">Календар</a>
+  </div>
 </div>
-
-<div class="kanban-board">
-    <?php
-    $statusLabels = [
-        'new' => '🆕 Нові',
-        'in_progress' => '🔄 В роботі',
-        'on_hold' => '⏸️ На паузі',
-        'review' => '👀 На перевірці',
-        'done' => '✅ Виконано',
-    ];
-    foreach ($columns as $status => $tasks):
-    ?>
-        <div class="kanban-column" data-status="<?= e($status) ?>">
-            <div class="kanban-column-title"><?= e($statusLabels[$status] ?? $status) ?> (<?= count($tasks) ?>)</div>
-            <div class="kanban-list">
-                <?php foreach ($tasks as $task): ?>
-                    <div class="kanban-card" data-id="<?= e($task['public_id'] ?? '') ?>" data-status-url="<?= url('/tasks/' . ($task['public_id'] ?? '') . '/status') ?>">
-                        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">
-                            <?= e($task['code'] ?? '') ?>
-                        </div>
-                        <div style="font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">
-                            <a href="<?= url('/tasks/' . ($task['public_id'] ?? '')) ?>"><?= e($task['title'] ?? '') ?></a>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
-                            <span class="badge badge-<?= $task['priority'] === 'critical' ? 'danger' : ($task['priority'] === 'high' ? 'warning' : 'info') ?>">
-                                <?= e($task['priority'] ?? '') ?>
-                            </span>
-                            <?php if ($task['due_at'] ?? ''): ?>
-                                <span style="color: var(--text-muted);"><?= dt($task['due_at'], 'd.m') ?></span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-                <?php if (empty($tasks)): ?>
-                    <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8125rem;">
-                        Порожньо
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    <?php endforeach; ?>
-</div>
-
+<div class="board kanban-board">
 <?php
-\App\Core\View::endSection();
+$labels = ['new'=>'Заплановано','in_progress'=>'У роботі','on_hold'=>'На паузі','review'=>'На перевірці','done'=>'Готово'];
+foreach ($columns as $status => $tasks):
+?>
+<div class="col kanban-column" data-status="<?= e($status) ?>">
+  <h2><span><?= e($labels[$status] ?? $status) ?></span><em><?= count($tasks) ?></em></h2>
+  <div class="kanban-list">
+  <?php if (empty($tasks)): ?>
+    <div class="empty">Порожньо</div>
+  <?php else: foreach ($tasks as $t): ?>
+    <div class="task kanban-card" data-id="<?= e($t['public_id'] ?? '') ?>" data-status-url="<?= url('/tasks/' . ($t['public_id'] ?? '') . '/status') ?>">
+      <a href="<?= url('/tasks/' . ($t['public_id'] ?? '')) ?>" style="color:var(--text);text-decoration:none">
+        <b><?= e($t['title'] ?? '') ?></b>
+        <small>
+          <span class="badge badge-<?= $t['priority']==='critical'?'bad':($t['priority']==='high'?'warn':'accent') ?>"><?= e($t['priority']) ?></span>
+          <span><?= $t['due_at'] ? dt($t['due_at'], 'd.m') : '' ?></span>
+        </small>
+      </a>
+    </div>
+  <?php endforeach; endif; ?>
+  </div>
+</div>
+<?php endforeach; ?>
+</div>
+<?php \App\Core\View::endSection(); ?>
